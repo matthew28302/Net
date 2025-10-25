@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Network, Search, Globe, Shield, List } from 'lucide-react'
-import PingTab from '@/components/tools/PingTab'
 import DigTab from '@/components/tools/DigTab'
 import CheckHostTab from '@/components/tools/CheckHostTab'
 import SSLDecoderTab from '@/components/tools/SSLDecoderTab'
@@ -44,9 +43,7 @@ export default function Home() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="ping" className="mt-6">
-          <PingTab />
-        </TabsContent>
+
 
         <TabsContent value="dig" className="mt-6">
           <DigTab />
