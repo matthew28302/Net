@@ -9,6 +9,10 @@ type SourceResult = { source: string; edns: string; ok: boolean; result?: any; e
  * - Make search card layout identical to CheckHost: balanced padding, centered, consistent rounded border
  * - Inputs evenly spaced and full width; button aligned to the right
  * - Monochrome look preserved
+ * - Adjusted for a more compact and consistent look as requested:
+ *   - Reduced card padding from p-5 to p-4.
+ *   - Reduced vertical padding of input/select/button from py-3 to py-2.5.
+ *   - Reduced grid gap from gap-3 to gap-2.5.
  */
 export default function DigTab() {
   const [domain, setDomain] = useState('')
@@ -45,17 +49,17 @@ export default function DigTab() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 px-4"> {/* mt-6 để gần navbar như CheckHost */}
+    <div className="max-w-4xl mx-auto mt-6 px-4">
       {/* Query card - styled to match CheckHost */}
-      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-5">
-        <div className="grid grid-cols-12 gap-3 items-center">
+      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-4"> {/* Thay đổi: p-5 -> p-4 */}
+        <div className="grid grid-cols-12 gap-2.5 items-center"> {/* Thay đổi: gap-3 -> gap-2.5 */}
           <div className="col-span-12 md:col-span-8">
             <input
               aria-label="domain"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="example.com"
-              className="w-full px-4 py-3 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
+              className="w-full px-4 py-2.5 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10" // Thay đổi: py-3 -> py-2.5
             />
           </div>
 
@@ -63,7 +67,7 @@ export default function DigTab() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full px-3 py-3 rounded-lg border border-black/10 bg-white text-black"
+              className="w-full px-3 py-2.5 rounded-lg border border-black/10 bg-white text-black" // Thay đổi: py-3 -> py-2.5
             >
               {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
                 <option key={t} value={t}>
@@ -77,7 +81,7 @@ export default function DigTab() {
             <button
               onClick={handleQuery}
               disabled={loading}
-              className="inline-flex items-center px-4 py-3 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60"
+              className="inline-flex items-center px-4 py-2.5 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60" // Thay đổi: py-3 -> py-2.5
             >
               {loading ? 'Đang...' : 'Query'}
             </button>
