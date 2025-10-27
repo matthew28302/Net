@@ -43,8 +43,8 @@ export default function DigTab() {
   }
 
   return (
-    {/* Thay đổi: max-w-7xl -> w-full và mt-6 -> mt-4 */}
     <div className="w-full mt-4 px-4 sm:px-6 lg:px-8">
+      {/* Thay đổi: max-w-7xl -> w-full và mt-6 -> mt-4 */}
       {/* Query card - more compact styling */}
       <div className="bg-white border border-black/10 rounded-xl shadow-sm p-3">
         <div className="grid grid-cols-12 gap-2 items-center">
