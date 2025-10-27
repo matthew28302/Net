@@ -4,12 +4,9 @@ type DNSAnswer = { name: string; type: number; TTL: number; data: string }
 type SourceResult = { source: string; edns: string; ok: boolean; result?: any; error?: string }
 
 /**
- * Updated for a more compact and perfectly aligned search bar:
- * - Reduced card padding to p-3 for a tighter layout.
- * - Set a fixed height (h-10) for input, select, and button to ensure they are all the same size.
- * - Reduced grid gap to gap-2 for a more unified look.
- * - Adjusted padding to work with the new fixed height.
- * - **NEW:** Changed main container from max-w-4xl to max-w-7xl to match navbar width.
+ * Updated to match navbar width and position:
+ * - Changed main container from max-w-7xl to w-full for full-width layout.
+ * - Reduced top margin from mt-6 to mt-4 to move it closer to the navbar.
  */
 export default function DigTab() {
   const [domain, setDomain] = useState('')
@@ -46,8 +43,8 @@ export default function DigTab() {
   }
 
   return (
-    // Thay đổi: max-w-4xl -> max-w-7xl và thêm padding linh hoạt
-    <div className="max-w-7xl mx-auto mt-6 px-4 sm:px-6 lg:px-8">
+    {/* Thay đổi: max-w-7xl -> w-full và mt-6 -> mt-4 */}
+    <div className="w-full mt-4 px-4 sm:px-6 lg:px-8">
       {/* Query card - more compact styling */}
       <div className="bg-white border border-black/10 rounded-xl shadow-sm p-3">
         <div className="grid grid-cols-12 gap-2 items-center">
