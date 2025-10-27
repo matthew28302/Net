@@ -1,13 +1,15 @@
+'use client'
+
 import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Loader2, Search } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 type DNSAnswer = { name: string; type: number; TTL: number; data: string }
 type SourceResult = { source: string; edns: string; ok: boolean; result?: any; error?: string }
 
-/**
- * Updated to match navbar width and position:
- * - Changed main container from max-w-7xl to w-full for full-width layout.
- * - Reduced top margin from mt-6 to mt-4 to move it closer to the navbar.
- */
 export default function DigTab() {
   const [domain, setDomain] = useState('')
   const [type, setType] = useState('A')
@@ -42,95 +44,108 @@ export default function DigTab() {
     }
   }
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleQuery()
+    }
+  }
+
   return (
-    <div className="w-full mt-4 px-4 sm:px-6 lg:px-8">
-      {/* Thay đổi: max-w-7xl -> w-full và mt-6 -> mt-4 */}
-      {/* Query card - more compact styling */}
-      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-3">
-        <div className="grid grid-cols-12 gap-2 items-center">
-          <div className="col-span-12 md:col-span-8">
-            <input
-              aria-label="domain"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-              placeholder="example.com"
-              className="w-full h-10 px-4 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
-            />
-          </div>
-
-          <div className="col-span-6 md:col-span-2">
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-black/10 bg-white text-black appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] bg-no-repeat bg-right"
-              style={{ backgroundPosition: 'right 0.5rem center' }}
-            >
-              {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-span-6 md:col-span-2 flex justify-end">
-            <button
-              onClick={handleQuery}
-              disabled={loading}
-              className="inline-flex items-center h-10 px-4 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60"
-            >
-              {loading ? 'Đang...' : 'Query'}
-            </button>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Search className="h-5 w-5" />
+          DNS Lookup: {domain || 'example.com'}
+        </CardTitle>
+        <CardDescription>
+          Query DNS records for a domain, including A, AAAA, CNAME, MX, and more.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Enter domain (e.g., example.com)"
+            value={domain}
+            onChange={(e) => setDomain(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="flex-1"
+          />
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="w-[120px] px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <Button onClick={handleQuery} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Querying...
+              </>
+            ) : (
+              'Query'
+            )}
+          </Button>
         </div>
 
-        {error && <div className="text-sm text-rose-600 mt-3">{error}</div>}
-      </div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      {/* Results */}
-      {results && (
-        <div className="bg-white border border-black/10 rounded-md p-4 shadow-sm mt-6">
-          <div className="text-sm text-black/70 mb-3">
-            Kết quả cho <strong className="text-black">{domain}</strong> — <span className="font-mono">{type}</span>
-          </div>
+        {results && (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Kết quả cho <strong>{domain}</strong> — <span className="font-mono">{type}</span>
+            </div>
+            <div className="space-y-3">
+              {results.map((r, idx) => {
+                const ips: string[] = Array.isArray(r.result?.Answer)
+                  ? [...new Set(r.result.Answer.map((a: DNSAnswer) => String(a.data)))]
+                  : []
 
-          <div className="divide-y divide-black/5">
-            {results.map((r, idx) => {
-              const ips: string[] = Array.isArray(r.result?.Answer)
-                ? [...new Set(r.result.Answer.map((a: DNSAnswer) => String(a.data)))]
-                : []
-
-              return (
-                <div key={idx} className="py-3 flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-black">{r.source}</div>
-                    <div className="text-xs text-black/60 mt-1">{r.edns}</div>
-                    {!r.ok && <div className="text-xs text-rose-600 mt-1">{r.error || 'Query failed'}</div>}
-                  </div>
-
-                  <div className="min-w-[160px] flex-shrink-0 text-right">
-                    {r.ok ? (
-                      ips.length > 0 ? (
-                        <div className="flex flex-col items-end">
-                          {ips.map((ip, i) => (
-                            <span key={i} className="text-blue-600 font-mono text-sm">
-                              {ip}
-                            </span>
-                          ))}
+                return (
+                  <Card key={idx}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium">{r.source}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{r.edns}</div>
+                          {!r.ok && <div className="text-xs text-destructive mt-1">{r.error || 'Query failed'}</div>}
                         </div>
-                      ) : (
-                        <div className="text-sm text-black/60">Không có bản ghi</div>
-                      )
-                    ) : (
-                      <div className="text-sm text-rose-600">{r.error || 'Query failed'}</div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+
+                        <div className="min-w-[160px] flex-shrink-0 text-right">
+                          {r.ok ? (
+                            ips.length > 0 ? (
+                              <div className="flex flex-col items-end">
+                                {ips.map((ip, i) => (
+                                  <span key={i} className="text-blue-600 font-mono text-sm">
+                                    {ip}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-muted-foreground">Không có bản ghi</div>
+                            )
+                          ) : (
+                            <div className="text-sm text-destructive">{r.error || 'Query failed'}</div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
