@@ -9,6 +9,7 @@ type SourceResult = { source: string; edns: string; ok: boolean; result?: any; e
  * - Set a fixed height (h-10) for input, select, and button to ensure they are all the same size.
  * - Reduced grid gap to gap-2 for a more unified look.
  * - Adjusted padding to work with the new fixed height.
+ * - **NEW:** Changed main container from max-w-4xl to max-w-7xl to match navbar width.
  */
 export default function DigTab() {
   const [domain, setDomain] = useState('')
@@ -45,17 +46,18 @@ export default function DigTab() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 px-4">
+    // Thay đổi: max-w-4xl -> max-w-7xl và thêm padding linh hoạt
+    <div className="max-w-7xl mx-auto mt-6 px-4 sm:px-6 lg:px-8">
       {/* Query card - more compact styling */}
-      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-3"> {/* Thay đổi: p-4 -> p-3 */}
-        <div className="grid grid-cols-12 gap-2 items-center"> {/* Thay đổi: gap-2.5 -> gap-2 */}
+      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-3">
+        <div className="grid grid-cols-12 gap-2 items-center">
           <div className="col-span-12 md:col-span-8">
             <input
               aria-label="domain"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="example.com"
-              className="w-full h-10 px-4 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10" // Thay đổi: py-2.5 -> h-10
+              className="w-full h-10 px-4 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
             />
           </div>
 
@@ -63,7 +65,8 @@ export default function DigTab() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-black/10 bg-white text-black" // Thay đổi: py-2.5 -> h-10
+              className="w-full h-10 px-3 rounded-lg border border-black/10 bg-white text-black appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS1vcGFjaXR5PSIwLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')] bg-no-repeat bg-right"
+              style={{ backgroundPosition: 'right 0.5rem center' }}
             >
               {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
                 <option key={t} value={t}>
@@ -77,7 +80,7 @@ export default function DigTab() {
             <button
               onClick={handleQuery}
               disabled={loading}
-              className="inline-flex items-center h-10 px-4 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60" // Thay đổi: py-2.5 -> h-10
+              className="inline-flex items-center h-10 px-4 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60"
             >
               {loading ? 'Đang...' : 'Query'}
             </button>
