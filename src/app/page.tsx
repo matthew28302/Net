@@ -19,29 +19,29 @@ export default function Home() {
         </p>
       </div>
 
-      <Tabs defaultValue="ping" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="ping" className="flex items-center gap-2">
-            <Network className="h-4 w-4" />
-            Ping
-          </TabsTrigger>
-          <TabsTrigger value="dig" className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            Dig
-          </TabsTrigger>
-          <TabsTrigger value="checkhost" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            Check Host
-          </TabsTrigger>
-          <TabsTrigger value="ssl" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            SSL Decoder
-          </TabsTrigger>
-          <TabsTrigger value="bulk" className="flex items-center gap-2">
-            <List className="h-4 w-4" />
-            Bulk Check
-          </TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="dig" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+  <TabsTrigger value="dig" className="flex items-center gap-2">
+    <Search className="h-4 w-4" />
+    Dig
+  </TabsTrigger>
+
+  <TabsTrigger value="checkhost" className="flex items-center gap-2">
+    <Globe className="h-4 w-4" />
+    Check Host
+  </TabsTrigger>
+
+  <TabsTrigger value="ssl" className="flex items-center gap-2">
+    <Shield className="h-4 w-4" />
+    SSL Decoder
+  </TabsTrigger>
+
+  <TabsTrigger value="bulk" className="flex items-center gap-2">
+    <List className="h-4 w-4" />
+    Bulk Check
+  </TabsTrigger>
+</TabsList>
+
 
 
 
