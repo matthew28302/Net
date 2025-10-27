@@ -62,26 +62,48 @@ const SOURCES: Source[] = [
   { label: 'bdDhaka, Bangladesh', edns: '103.78.0.0/16' }
 ]
 
+// helper: fetch with timeout and normalized response
+async function fetchDnsForSource(name: string, type: string, source: Source, timeoutMs = 7000) {
+  const url = `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}&edns_client_subnet=${encodeURIComponent(source.edns)}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: 'application/dns-json' },
+      signal: controller.signal
+    })
+    clearTimeout(timer)
+    const json = await res.json().catch(() => null)
+    if (!res.ok) {
+      return { source: source.label, edns: source.edns, ok: false, error: `HTTP ${res.status}` }
+    }
+    return { source: source.label, edns: source.edns, ok: true, result: json }
+  } catch (err: any) {
+    clearTimeout(timer)
+    const msg = err?.name === 'AbortError' ? 'timeout' : (err?.message || String(err))
+    return { source: source.label, edns: source.edns, ok: false, error: msg }
+  }
+}
+
+// Batch requests to avoid opening too many concurrent fetches.
+// Replace BATCH_SIZE to tune concurrency.
+const BATCH_SIZE = 12
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const body = await req.json().catch(() => ({}))
     const name = String(body.name || '').trim()
     const type = String(body.type || 'A').trim().toUpperCase()
     if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 })
 
-    // Query Google DNS-over-HTTPS with edns_client_subnet per source to simulate different locations/ISPs.
-    const queries = SOURCES.map(async (s) => {
-      const url = `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}&edns_client_subnet=${encodeURIComponent(s.edns)}`
-      try {
-        const r = await fetch(url, { headers: { Accept: 'application/dns-json' } })
-        const json = await r.json()
-        return { source: s.label, edns: s.edns, ok: true, result: json }
-      } catch (e: any) {
-        return { source: s.label, edns: s.edns, ok: false, error: String(e?.message || e) }
-      }
-    })
+    const results: any[] = []
+    for (let i = 0; i < SOURCES.length; i += BATCH_SIZE) {
+      const batch = SOURCES.slice(i, i + BATCH_SIZE)
+      const promises = batch.map((s) => fetchDnsForSource(name, type, s))
+      const settled = await Promise.all(promises)
+      results.push(...settled)
+    }
 
-    const results = await Promise.all(queries)
     return NextResponse.json({ query: name, type, results })
   } catch (err: any) {
     return NextResponse.json({ error: String(err?.message || err) }, { status: 500 })
