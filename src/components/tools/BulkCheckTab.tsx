@@ -14,11 +14,6 @@ import { toast } from 'sonner'
 
 interface BulkCheckItem {
   host: string
-  ping?: {
-    status: 'online' | 'offline' | 'error'
-    responseTime?: number
-    error?: string
-  }
   dig?: {
     a?: {
       status: 'success' | 'error'
@@ -49,7 +44,6 @@ interface BulkCheckResult {
 
 export default function BulkCheckTab() {
   const [hosts, setHosts] = useState('')
-  const [checkPing, setCheckPing] = useState(true)
   const [checkDig, setCheckDig] = useState(true)
   const [checkSSL, setCheckSSL] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -72,7 +66,7 @@ export default function BulkCheckTab() {
       return
     }
 
-    if (!checkPing && !checkDig && !checkSSL) {
+    if (!checkDig && !checkSSL) {
       toast.error('Please select at least one check type')
       return
     }
@@ -95,7 +89,6 @@ export default function BulkCheckTab() {
         body: JSON.stringify({
           hosts: hostList,
           checks: {
-            ping: checkPing,
             dig: checkDig,
             ssl: checkSSL,
           },
@@ -113,7 +106,6 @@ export default function BulkCheckTab() {
       setResult(data)
       
       const successCount = data.items.filter(item => {
-        if (checkPing && item.ping?.status === 'online') return true
         if (checkDig && (item.dig?.a?.status === 'success' || item.dig?.ns?.status === 'success')) return true
         if (checkSSL && item.ssl?.status === 'valid') return true
         return false
@@ -128,28 +120,26 @@ export default function BulkCheckTab() {
       setLoading(false)
       setTimeout(() => setProgress(0), 1000)
     }
-  }, [hosts, checkPing, checkDig, checkSSL, updateProgress])
+  }, [hosts, checkDig, checkSSL, updateProgress])
 
   // Memoized statistics
   const stats = useMemo(() => {
     if (!result) return null
 
     const passed = result.items.filter(item => {
-      if (checkPing && item.ping?.status === 'online') return true
       if (checkDig && (item.dig?.a?.status === 'success' || item.dig?.ns?.status === 'success')) return true
       if (checkSSL && item.ssl?.status === 'valid') return true
       return false
     }).length
 
     const failed = result.items.filter(item => {
-      if (checkPing && item.ping?.status === 'offline') return true
       if (checkDig && (item.dig?.a?.status === 'error' || item.dig?.ns?.status === 'error')) return true
       if (checkSSL && (item.ssl?.status === 'expired' || item.ssl?.status === 'error')) return true
       return false
     }).length
 
     return { passed, failed }
-  }, [result, checkPing, checkDig, checkSSL])
+  }, [result, checkDig, checkSSL])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -218,17 +208,6 @@ github.com
             <div>
               <Label className="text-sm font-medium">Check Types:</Label>
               <div className="mt-2 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="checkPing"
-                    checked={checkPing}
-                    onCheckedChange={(checked) => setCheckPing(checked as boolean)}
-                  />
-                  <Label htmlFor="checkPing" className="flex items-center gap-2 text-sm">
-                    <Network className="h-4 w-4" />
-                    Ping Test
-                  </Label>
-                </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="checkDig"
@@ -332,28 +311,7 @@ github.com
                         <h4 className="font-medium">{item.host}</h4>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {checkPing && item.ping && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <Network className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">Ping</span>
-                              {getStatusIcon(item.ping.status)}
-                            </div>
-                            {getStatusBadge(item.ping.status)}
-                            {item.ping.responseTime && (
-                              <div className="text-xs text-muted-foreground">
-                                {item.ping.responseTime}ms
-                              </div>
-                            )}
-                            {item.ping.error && (
-                              <div className="text-xs text-red-600">
-                                {item.ping.error}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {checkDig && item.dig && (
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
