@@ -38,56 +38,84 @@ export default function DigTab() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <input
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-          placeholder="example.com"
-          style={{ flex: 1, padding: 8 }}
-        />
-        <select value={type} onChange={(e) => setType(e.target.value)} style={{ padding: 8 }}>
-          {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-        <button onClick={handleQuery} disabled={loading} style={{ padding: '8px 12px' }}>
-          {loading ? 'Đang...' : 'Query'}
-        </button>
+    <div className="max-w-4xl mx-auto">
+      {/* Query card */}
+      <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex gap-3 items-center">
+          <input
+            aria-label="domain"
+            value={domain}
+            onChange={(e) => setDomain(e.target.value)}
+            placeholder="example.com"
+            className="flex-1 px-3 py-2 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="px-3 py-2 rounded-md border border-slate-200 bg-white"
+          >
+            {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleQuery}
+            disabled={loading}
+            className="ml-2 inline-flex items-center px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 disabled:opacity-60"
+          >
+            {loading ? 'Đang...' : 'Query'}
+          </button>
+        </div>
+        {error && <div className="text-sm text-rose-600 mt-3">{error}</div>}
       </div>
 
-      {error && <div style={{ color: 'crimson', marginBottom: 12 }}>{error}</div>}
-
+      {/* Results */}
       {results && (
-        <div style={{ display: 'grid', gap: 12 }}>
-          {results.map((r, idx) => (
-            <div key={idx} style={{ border: '1px solid #eee', padding: 10, borderRadius: 6 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ fontWeight: 600 }}>{r.source}</div>
-                <div style={{ fontSize: 12, color: '#666' }}>{r.edns}</div>
-              </div>
+        <div className="grid gap-4">
+          <div className="text-sm text-slate-600 mb-1">
+            Kết quả cho <strong>{domain}</strong> — <span className="font-mono">{type}</span>
+          </div>
 
-              {!r.ok ? (
-                <div style={{ color: 'crimson' }}>{r.error || 'Query failed'}</div>
-              ) : (
-                <div style={{ display: 'grid', gap: 6 }}>
-                  {r.result?.Answer && r.result.Answer.length > 0 ? (
-                    r.result.Answer.map((a: DNSAnswer, i: number) => (
-                      <div key={i} style={{ background: '#fafafa', padding: 8, borderRadius: 4 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <div style={{ fontFamily: 'monospace' }}>{a.data}</div>
-                          <div style={{ fontSize: 12 }}>{a.TTL}s</div>
-                        </div>
-                        <div style={{ fontSize: 12, color: '#666' }}>{a.name} — type {a.type}</div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ fontSize: 13, color: '#333' }}>Không có bản ghi</div>
-                  )}
+          <div className="grid md:grid-cols-2 gap-4">
+            {results.map((r, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-medium text-slate-800">{r.source}</div>
+                  <div className="text-xs text-slate-500">{r.edns}</div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {!r.ok ? (
+                  <div className="text-sm text-rose-600">{r.error || 'Query failed'}</div>
+                ) : (
+                  <div className="space-y-2">
+                    {r.result?.Answer && r.result.Answer.length > 0 ? (
+                      r.result.Answer.map((a: DNSAnswer, i: number) => (
+                        <div
+                          key={i}
+                          className="bg-slate-50 border border-slate-100 rounded-md p-2 text-sm"
+                        >
+                          <div className="flex justify-between items-center">
+                            <div className="font-mono text-slate-800">{a.data}</div>
+                            <div className="text-xs text-slate-600">{a.TTL}s</div>
+                          </div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            {a.name} — type {a.type}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-slate-600">Không có bản ghi trả về</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
