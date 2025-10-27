@@ -4,10 +4,11 @@ type DNSAnswer = { name: string; type: number; TTL: number; data: string }
 type SourceResult = { source: string; edns: string; ok: boolean; result?: any; error?: string }
 
 /**
- * Cập nhật:
- * - Tông màu đen-trắng (monochrome)
- * - Thêm khoảng cách trên (mt-20) để khung tìm kiếm không bị che bởi navbar cố định
- * - Kết quả: mỗi nguồn xếp hàng (1 bên server, 1 bên IP); IP màu xanh dương
+ * Updated:
+ * - Reduce top margin so search card sits closer to navbar (mt-6)
+ * - Make search card layout identical to CheckHost: balanced padding, centered, consistent rounded border
+ * - Inputs evenly spaced and full width; button aligned to the right
+ * - Monochrome look preserved
  */
 export default function DigTab() {
   const [domain, setDomain] = useState('')
@@ -44,50 +45,57 @@ export default function DigTab() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-20 px-4"> {/* mt-20 tránh bị navbar che */}
-      {/* Query card - monochrome */}
-      <div className="bg-white border border-black/10 rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex gap-3 items-center">
-          <input
-            aria-label="domain"
-            value={domain}
-            onChange={(e) => setDomain(e.target.value)}
-            placeholder="example.com"
-            className="flex-1 px-4 py-3 rounded-md border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
-          />
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="px-4 py-3 rounded-md border border-black/10 bg-white text-black"
-          >
-            {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleQuery}
-            disabled={loading}
-            className="ml-2 inline-flex items-center px-4 py-3 border border-black/20 bg-black text-white rounded-md hover:bg-black/90 disabled:opacity-60"
-          >
-            {loading ? 'Đang...' : 'Query'}
-          </button>
+    <div className="max-w-4xl mx-auto mt-6 px-4"> {/* mt-6 để gần navbar như CheckHost */}
+      {/* Query card - styled to match CheckHost */}
+      <div className="bg-white border border-black/10 rounded-xl shadow-sm p-5">
+        <div className="grid grid-cols-12 gap-3 items-center">
+          <div className="col-span-12 md:col-span-8">
+            <input
+              aria-label="domain"
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              placeholder="example.com"
+              className="w-full px-4 py-3 rounded-lg border border-black/10 bg-white text-black placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-black/10"
+            />
+          </div>
+
+          <div className="col-span-6 md:col-span-2">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full px-3 py-3 rounded-lg border border-black/10 bg-white text-black"
+            >
+              {['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'PTR', 'SRV'].map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-span-6 md:col-span-2 flex justify-end">
+            <button
+              onClick={handleQuery}
+              disabled={loading}
+              className="inline-flex items-center px-4 py-3 border border-black/20 bg-black text-white rounded-lg hover:bg-black/90 disabled:opacity-60"
+            >
+              {loading ? 'Đang...' : 'Query'}
+            </button>
+          </div>
         </div>
+
         {error && <div className="text-sm text-rose-600 mt-3">{error}</div>}
       </div>
 
-      {/* Results header */}
+      {/* Results */}
       {results && (
-        <div className="bg-white border border-black/10 rounded-md p-4 shadow-sm">
+        <div className="bg-white border border-black/10 rounded-md p-4 shadow-sm mt-6">
           <div className="text-sm text-black/70 mb-3">
             Kết quả cho <strong className="text-black">{domain}</strong> — <span className="font-mono">{type}</span>
           </div>
 
-          {/* Results list: mỗi nguồn 1 hàng, trái = server, phải = IPs (màu xanh) */}
           <div className="divide-y divide-black/5">
             {results.map((r, idx) => {
-              // thu thập danh sách "IP" hiển thị từ Answer[].data
               const ips: string[] = Array.isArray(r.result?.Answer)
                 ? [...new Set(r.result.Answer.map((a: DNSAnswer) => String(a.data)))]
                 : []
@@ -103,7 +111,6 @@ export default function DigTab() {
                   <div className="min-w-[160px] flex-shrink-0 text-right">
                     {r.ok ? (
                       ips.length > 0 ? (
-                        // hiển thị mỗi IP trên 1 dòng, màu xanh dương
                         <div className="flex flex-col items-end">
                           {ips.map((ip, i) => (
                             <span key={i} className="text-blue-600 font-mono text-sm">
